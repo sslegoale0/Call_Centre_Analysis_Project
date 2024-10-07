@@ -121,12 +121,12 @@ FROM calls
 ORDER BY [Call Timestamp];
 
 SELECT DISTINCT [Call Timestamp],
-CONVERT(NVARCHAR(255), CONVERT(DATE, [Call Timestamp], 105)) AS "Call Date"
+CONVERT(DATE, [Call Timestamp], 105) AS "Call Date"
 FROM calls
 ORDER BY [Call Timestamp];
 
 UPDATE calls
-SET [Call Timestamp] = CONVERT(NVARCHAR(255), CONVERT(DATE, [Call Timestamp], 105))
+SET [Call Timestamp] = CONVERT(DATE, [Call Timestamp], 105)
 ALTER TABLE calls
 ALTER COLUMN [Call Timestamp] DATE;
 
@@ -225,6 +225,15 @@ ORDER BY [Sentiment], [CSAT Score];
 
 /* 4. Removal of redundant/irrelevant columns. */
 
+
+
+/* 5. Removal of rows irrelevant for analysis. */
+
+DELETE
+FROM calls
+WHERE DAY([Call Date]) = 31 OR [State] IN ('Alaska', 'Hawaii');
+
+
 ----------------------------------------------------------------------------------------------------------------------
 
 /* Call Centre Data Analysis. */
@@ -232,32 +241,28 @@ ORDER BY [Sentiment], [CSAT Score];
 /* 1. Total number of calls. */
 
 SELECT COUNT(DISTINCT [Call Id]) AS "Total Calls"
-FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii');
+FROM calls;
 
 
 
 /* 2. Total call duration in munutes. */
 
 SELECT SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)"
-FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii');
+FROM calls;
 
 
 
 /* 3. Average call duration in minutes */
 
 SELECT ROUND(AVG([Call Duration (Mins)]), 2) AS "Average Call Duration (Mins)"
-FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii');
+FROM calls;
 
 
 
 /* 4. Average CSAT score */
 
 SELECT ROUND(AVG([CSAT Score]), 2) AS "Average CSAT Score"
-FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii');
+FROM calls;
 
 
 
@@ -266,7 +271,6 @@ WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii');
 SELECT [Call Date],
 COUNT(DISTINCT [Call Id]) AS "Total Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Call Date]
 ORDER BY [Call Date];
 
@@ -277,7 +281,6 @@ ORDER BY [Call Date];
 SELECT [Call Date],
 SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Call Date]
 ORDER BY [Call Date];
 
@@ -288,7 +291,6 @@ ORDER BY [Call Date];
 SELECT DATENAME(WEEKDAY, [Call Date]) AS "Dayname",
 COUNT( DISTINCT [Call Id]) AS "Total Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY DATEPART(WEEKDAY, [Call Date]), DATENAME(WEEKDAY, [Call Date])
 ORDER BY DATEPART(WEEKDAY, [Call Date]);
 
@@ -299,7 +301,6 @@ ORDER BY DATEPART(WEEKDAY, [Call Date]);
 SELECT DATENAME(WEEKDAY, [Call Date]) AS "Weekday",
 SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY DATEPART(WEEKDAY, [Call Date]), DATENAME(WEEKDAY, [Call Date])
 ORDER BY DATEPART(WEEKDAY, [Call Date]);
 
@@ -310,7 +311,6 @@ ORDER BY DATEPART(WEEKDAY, [Call Date]);
 SELECT [State],
 COUNT(DISTINCT [Call Id]) AS "Total Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [State];
 
 
@@ -320,7 +320,6 @@ GROUP BY [State];
 SELECT [State],
 COUNT(DISTINCT [Call Id]) AS "Total Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [State];
 
 
@@ -332,7 +331,6 @@ COUNT(DISTINCT [Call Id]) AS "Total Calls",
 COUNT(DISTINCT [Call Id])*100/(SELECT COUNT(DISTINCT [Call Id])
 										FROM calls)  AS "% of Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Call Centre City];
 
 
@@ -344,7 +342,6 @@ SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)",
 ROUND(SUM([Call Duration (Mins)])*100/(SELECT SUM([Call Duration (Mins)])
 										FROM calls), 2)  AS "% of Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Call Centre City];
 
 
@@ -356,7 +353,6 @@ COUNT(DISTINCT [Call Id]) AS "Total Calls",
 ROUND(CAST(COUNT(DISTINCT [Call Id]) AS FLOAT)*100/(SELECT COUNT(DISTINCT [Call Id])
 										   FROM calls), 2)  AS "% of Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Channel];
 
 
@@ -368,7 +364,6 @@ SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)",
 ROUND(SUM([Call Duration (Mins)])*100/(SELECT SUM([Call Duration (Mins)])
 														 FROM calls), 2)  AS "% of Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Channel];
 
 
@@ -380,7 +375,6 @@ COUNT(DISTINCT [Call Id]) AS "Total Calls",
 ROUND(CAST(COUNT(DISTINCT [Call Id]) AS FLOAT)*100/(SELECT COUNT(DISTINCT [Call Id])
 										   FROM calls), 2) AS "% of Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Reason];
 
 
@@ -392,7 +386,6 @@ SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)",
 ROUND(SUM([Call Duration (Mins)])*100/(SELECT SUM([Call Duration (Mins)])
 														 FROM calls), 2)  AS "% of Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Reason];
 
 
@@ -404,7 +397,6 @@ COUNT(DISTINCT [Call Id]) AS "Total Calls",
 ROUND(CAST(COUNT(DISTINCT [Call Id]) AS FLOAT)*100/(SELECT COUNT(DISTINCT [Call Id])
 										   FROM calls), 2)  AS "% of Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Response Time];
 
 
@@ -416,7 +408,6 @@ SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)",
 ROUND(SUM([Call Duration (Mins)])*100/(SELECT SUM([Call Duration (Mins)])
 														 FROM calls), 2)  AS "% of Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Response Time];
 
 
@@ -428,7 +419,6 @@ COUNT(DISTINCT [Call Id]) AS "Total Calls",
 ROUND(CAST(COUNT(DISTINCT [Call Id]) AS FLOAT)*100/(SELECT COUNT(DISTINCT [Call Id])
 										   FROM calls), 2)  AS "% of Calls"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Sentiment];
 
 
@@ -440,5 +430,4 @@ SUM([Call Duration (Mins)]) AS "Total Call Duration (Mins)",
 ROUND(SUM([Call Duration (Mins)])*100/(SELECT SUM([Call Duration (Mins)])
 														 FROM calls), 2)  AS "% of Call Duration (Mins)"
 FROM calls
-WHERE DAY([Call Date]) <> 31 AND [State] NOT IN ('Alaska', 'Hawaii')
 GROUP BY [Sentiment];
